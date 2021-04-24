@@ -34,6 +34,9 @@ public class PlayerMovement : MonoBehaviour
     public float dashStartDuration = 0.1f;
     private float dashTime = 0;
 
+    private float timeSinceDash = 0f;
+    private float longJumpTime = 0.1f;
+
     void Start()
     {
        // audioManager = FindObjectOfType<AudioManager>();
@@ -68,18 +71,32 @@ public class PlayerMovement : MonoBehaviour
                 animator.SetTrigger("gotDash");
             } 
         }
+        if (timeSinceDash > 0)
+        {
+            timeSinceDash -= Time.deltaTime;
+        }
+        else if(jumpHeight == 50)
+        {
+            timeSinceDash = longJumpTime;
+            jumpHeight -= 20f;
+        }
+    
         if (groundCheck.onGround && Input.GetKeyDown(KeyCode.Space))
         {
             player.drag = JUMP_DRAG;
-            player.AddForce(Vector2.up * jumpHeight,ForceMode2D.Impulse);
+            player.AddForce(Vector2.up * jumpHeight, ForceMode2D.Impulse);
+
+            if (timeSinceDash > 0 && timeSinceDash != longJumpTime)
+                player.AddForce(Vector2.right * jumpHeight,ForceMode2D.Impulse);
+
             player.drag = DEFAULT_DRAG;
             animator.SetTrigger("Jump");
-         
+
         }
         if(!inDash && !usedDash && Input.GetKeyDown(KeyCode.F))
         {
 
-            RaycastHit2D hit = Physics2D.Raycast(dashRay.position,direction,.1f,dashBreakLayers);
+            RaycastHit2D hit = Physics2D.Raycast(dashRay.position,direction,breakRange,dashBreakLayers);
 
             Collider2D[] colliders = Physics2D.OverlapCircleAll(hit.point, .5f, dashBreakLayers);
 
@@ -91,6 +108,8 @@ public class PlayerMovement : MonoBehaviour
             inDash = true;
             dashTime = dashStartDuration;
             usedDash = true;
+            jumpHeight += 20f;
+            timeSinceDash = longJumpTime;
             animator.SetTrigger("Dash");
             animator.ResetTrigger("gotDash");
         }
