@@ -27,6 +27,7 @@ public class Switch : MonoBehaviour
             popUp.SetActive(false);
             turnedOn = true;
             GetComponent<Collider2D>().enabled = false;
+           // onSwitch.Invoke();
         }
     }
 

@@ -14,9 +14,14 @@ public class AudioManager : MonoBehaviour
         if (instanceID == -1)
             instanceID = gameObject.GetInstanceID();
         else
+        {
             Destroy(gameObject);
+            return;
+        }
 
-        foreach(Sound s in sounds)
+        DontDestroyOnLoad(gameObject);
+
+        foreach (Sound s in sounds)
         {
 
             s.source = gameObject.AddComponent<AudioSource>();
@@ -31,7 +36,7 @@ public class AudioManager : MonoBehaviour
 
     private void Start()
     {
-        Play("Welcome");
+        //Play("Welcome");
     }
 
     public void Play(string name)

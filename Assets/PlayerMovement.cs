@@ -16,6 +16,7 @@ public class PlayerMovement : MonoBehaviour
     public float jumpHeight = 30f;
     public float dashSpeed = 30f;
     public float breakRange = 10f;
+    public float dashJumpSpeed = 100f;
     
     public Transform dashRay;
     public LayerMask dashBreakLayers;
@@ -75,19 +76,16 @@ public class PlayerMovement : MonoBehaviour
         {
             timeSinceDash -= Time.deltaTime;
         }
-        else if(jumpHeight == 50)
-        {
-            timeSinceDash = longJumpTime;
-            jumpHeight -= 20f;
-        }
-    
         if (groundCheck.onGround && Input.GetKeyDown(KeyCode.Space))
         {
             player.drag = JUMP_DRAG;
+            if (timeSinceDash > 0)
+            {
+                player.AddForce(Vector2.right * jumpHeight, ForceMode2D.Impulse);
+            }
             player.AddForce(Vector2.up * jumpHeight, ForceMode2D.Impulse);
 
-            if (timeSinceDash > 0 && timeSinceDash != longJumpTime)
-                player.AddForce(Vector2.right * jumpHeight,ForceMode2D.Impulse);
+            
 
             player.drag = DEFAULT_DRAG;
             animator.SetTrigger("Jump");
@@ -108,8 +106,6 @@ public class PlayerMovement : MonoBehaviour
             inDash = true;
             dashTime = dashStartDuration;
             usedDash = true;
-            jumpHeight += 20f;
-            timeSinceDash = longJumpTime;
             animator.SetTrigger("Dash");
             animator.ResetTrigger("gotDash");
         }
@@ -120,6 +116,8 @@ public class PlayerMovement : MonoBehaviour
     {
 
         Vector2 velocity = new Vector2(axis * moveSpeed, player.velocity.y);
+        if (timeSinceDash > 0)
+            velocity = new Vector2(player.velocity.x + axis * moveSpeed, player.velocity.y);
 
         if (inDash && dashTime > 0)
         {
@@ -140,6 +138,7 @@ public class PlayerMovement : MonoBehaviour
             inDash = false;
             dashTime = dashStartDuration;
             animator.ResetTrigger("Dash");
+            timeSinceDash = longJumpTime;
         }
 
         if (velocity.x > maxSpeed && !inDash) // took me longer than i like to admit to realize i needed toadd here !inDash
